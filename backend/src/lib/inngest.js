@@ -8,17 +8,26 @@ const syncUser = inngest.createFunction(
   { id: "sync-user" },
   { event: "clerk/user.created" },
   async ({ event }) => {
-    await connectDB();
+    try {
+      console.log("⌛ Clerk user created event received:", event.data);
+      await connectDB();
+      console.log("✅ Database connected");
 
-    const { id, email_address, first_name, last_name, image_url } = event.data;
+      const { id, email_address, first_name, last_name, image_url } = event.data;
 
-    const newUser = {
-      clerkId: id,
-      email: email_address[0]?.email_address,
-      name: `${first_name || ""} ${last_name || ""}`,
-      profileImage: image_url,
-    };
-    await User.create(newUser);
+      const newUser = {
+        clerkId: id,
+        email: email_address[0]?.email_address,
+        name: `${first_name || ""} ${last_name || ""}`,
+        profileImage: image_url,
+      };
+      console.log("📝 Attempting to create user:", newUser);
+      const createdUser = await User.create(newUser);
+      console.log("✅ User created successfully:", createdUser);
+    } catch (error) {
+      console.error("❌ Error syncing user to MongoDB:", error);
+      throw error;
+    }
   }
 );
 

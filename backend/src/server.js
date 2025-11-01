@@ -1,5 +1,6 @@
 import express from "express";
 import { ENV } from "./lib/env.js";
+import { connectDB } from "./lib/db.js";
 
 const app = express();
 
@@ -7,6 +8,19 @@ app.get("/health", (req, res) => {
   res.status(200).json({ msg: "API IS RUNNING" });
 });
 
-app.listen(ENV.PORT, () => {
-  console.log(`http://localhost:3000`);
+app.get("/books", (req, res) => {
+  res.status(200).json({ msg: "THis is the books endpoint" });
 });
+
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(ENV.PORT, () => {
+      console.log(`http://localhost:3000`);
+    });
+  } catch (error) {
+    console.error("Error starting the server",error);
+  }
+};
+
+startServer();
